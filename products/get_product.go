@@ -17,13 +17,7 @@ func GetProductByID(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	for _, product := range database.Products {
-		if product.Id == id {
-			utils.SendJSONResponse(res, http.StatusOK, "Product retrieved successfully", product)
-			return
-		}
-
-	}
-	utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", nil)
+	product := database.FindOne(id)
+	utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", product)
 	// Implementation for getting a product by ID will go here
 }

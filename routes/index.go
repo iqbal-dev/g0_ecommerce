@@ -26,6 +26,10 @@ func NewManager(mux *http.ServeMux) *Manager {
 	}
 }
 
+func (mgr *Manager) Use(middlewares ...Middleware) {
+	mgr.globalMiddlewares = append(mgr.globalMiddlewares, middlewares...)
+}
+
 // chain wraps a handler with global and route-level middlewares
 func (mgr *Manager) chain(final http.Handler, routeMws []Middleware) http.Handler {
 	for _, mw := range mgr.globalMiddlewares {

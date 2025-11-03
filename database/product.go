@@ -12,6 +12,50 @@ type Product struct {
 // products holds all the available products in memory.
 var Products []Product
 
+func Create(product Product) *Product {
+	product.Id = len(Products) + 1
+	Products = append(Products, product)
+	return &product
+}
+
+func FindALl() []Product {
+	return Products
+}
+
+func FindOne(id int) *Product {
+	for i := 0; i < len(Products); i++ {
+		if Products[i].Id == id {
+			return &Products[i]
+		}
+	}
+	return nil
+}
+
+func Update(id int, product Product) *Product {
+	for i := 0; i < len(Products); i++ {
+		if Products[i].Id == id {
+			Products[i] = product
+			return &Products[i]
+		}
+	}
+	return nil
+}
+
+func Delete(id int) bool {
+	var tempProductList []Product
+	var isDeleted bool = false
+
+	for i := 0; i < len(Products); i++ {
+		if Products[i].Id != id {
+			tempProductList = append(tempProductList, Products[i])
+		} else {
+			isDeleted = true
+		}
+	}
+	Products = tempProductList
+	return isDeleted
+}
+
 func init() {
 	prd1 := Product{1, "Product 1", 10.99, "This is product 1", "http://example.com/product1.jpg"}
 	prd2 := Product{2, "Product 2", 15.49, "This is product 2", "http://example.com/product2.jpg"}

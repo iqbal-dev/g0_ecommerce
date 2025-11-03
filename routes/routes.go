@@ -4,6 +4,7 @@ package routes
 func RegisterRoutes(router *Manager) {
 	// Register product routes
 	RegisterProductRoutes(router)
+	RegisterUserRoutes(router)
 
 	// You can add more module routes here in the future
 	// RegisterUserRoutes(router)

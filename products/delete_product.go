@@ -16,13 +16,13 @@ func DeleteProductById(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	for i, product := range database.Products {
-		if product.Id == id {
-			database.Products = append(database.Products[:i], database.Products[i+1:]...)
-			utils.SendJSONResponse(res, http.StatusOK, "Product deleted successfully", nil)
-			return
-		}
+	isDeleted := database.Delete(id)
+
+	if isDeleted {
+		utils.SendJSONResponse(res, http.StatusOK, "Product deleted successfully", nil)
+		return
 	}
+
 	utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", nil)
 
 	//here implement product delete

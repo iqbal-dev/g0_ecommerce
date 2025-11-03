@@ -7,6 +7,7 @@ import (
 
 // RegisterProductRoutes registers all product-related routes
 func RegisterProductRoutes(router *Manager) {
+	router.Use(middleware.LoggingMiddleware)
 	router.GET("/products",
 		middleware.ExecutionTimeMiddleware,
 		middleware.LoggingMiddleware,

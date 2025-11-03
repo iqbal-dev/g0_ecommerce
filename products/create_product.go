@@ -21,9 +21,7 @@ func CreateProduct(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Assign a new ID and append the product to the list
-	newProduct.Id = len(database.Products) + 1
-	database.Products = append(database.Products, newProduct)
+	product := database.Create(newProduct)
 
-	utils.SendJSONResponse(res, http.StatusCreated, "Product created successfully", newProduct)
+	utils.SendJSONResponse(res, http.StatusCreated, "Product created successfully", product)
 }
