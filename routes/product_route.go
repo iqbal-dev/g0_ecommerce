@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"ecommerce/middleware"
 	"ecommerce/products"
+	"ecommerce/repo"
+	"ecommerce/rest/middleware"
 )
 
 // RegisterProductRoutes registers all product-related routes
@@ -12,7 +13,7 @@ func RegisterProductRoutes(router *Manager) {
 		middleware.ExecutionTimeMiddleware,
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.GetProducts,
+		products.NewHandler(repo.NewProductRepo()).GetProducts,
 	)
 
 	router.GET("/products/{id}", // handle /products/{id} inside handler
@@ -24,12 +25,12 @@ func RegisterProductRoutes(router *Manager) {
 	router.POST("/products",
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.CreateProduct,
+		products.NewHandler(repo.NewProductRepo()).CreateProduct,
 	)
 	router.PATCH("/products/{id}",
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.UpdateProductById,
+		products.NewHandler(repo.NewProductRepo()).UpdateProductById,
 	)
 	router.DELETE("/products/{id}",
 		middleware.LoggingMiddleware,

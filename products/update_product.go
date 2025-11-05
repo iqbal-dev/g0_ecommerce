@@ -1,14 +1,22 @@
 package products
 
 import (
-	"ecommerce/database"
+	"ecommerce/repo"
 	"ecommerce/utils"
 	"encoding/json"
 	"net/http"
 	"strconv"
 )
 
-func UpdateProductById(res http.ResponseWriter, req *http.Request) {
+type UpdateProduct struct {
+	Id          int     `json:"id"`          // Unique identifier for the product
+	Name        string  `json:"name"`        // Product name
+	Price       float64 `json:"price"`       // Product price
+	Description string  `json:"description"` // Product description
+	ImgUrl      string  `json:"img_url"`     // Product image URL
+}
+
+func (h *Handler) UpdateProductById(res http.ResponseWriter, req *http.Request) {
 
 	productId := req.PathValue("id")
 
@@ -18,7 +26,7 @@ func UpdateProductById(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var newProduct database.Product
+	var newProduct UpdateProduct
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&newProduct)
 
@@ -29,9 +37,14 @@ func UpdateProductById(res http.ResponseWriter, req *http.Request) {
 
 	newProduct.Id = id
 
-	product := database.Update(id, newProduct)
+	product, err := h.productRepo.Update(id, repo.Product{
+		Name:        newProduct.Name,
+		Price:       newProduct.Price,
+		Description: newProduct.Description,
+		ImgUrl:      newProduct.ImgUrl,
+	})
 
-	if product == nil {
+	if err != nil {
 
 		utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", product)
 	}

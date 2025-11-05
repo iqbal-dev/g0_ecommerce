@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var configurations Config
+var configurations *Config
 
 type Config struct {
 	Version     string
@@ -19,25 +19,29 @@ func loadConfig() {
 
 	version := os.Getenv("VERSION")
 	if version == "" {
-		version = "dev"
+		os.Exit(1)
 	}
 	serviceName := os.Getenv("SERVICE_NAME")
 	if serviceName == "" {
-		serviceName = "ecommerce"
+		os.Exit(1)
 	}
 	httpPort := os.Getenv("HTTP_PORT")
 	if httpPort == "" {
-		httpPort = "3000"
+		os.Exit(1)
 	}
-	configurations = Config{
+	configurations = &Config{
 		Version:     version,
 		ServiceName: serviceName,
 		HttpPort:    ":" + httpPort,
 	}
 }
 
-func GetConfig() Config {
-	loadConfig()
+func GetConfig() *Config {
+
+	if configurations == nil {
+
+		loadConfig()
+	}
 	return configurations
 
 }
