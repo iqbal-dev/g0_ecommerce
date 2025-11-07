@@ -8,33 +8,43 @@ import (
 
 // RegisterProductRoutes registers all product-related routes
 func RegisterProductRoutes(router *Manager) {
+	// ✅ create repo once
+	productRepo := repo.NewProductRepo()
+
+	// ✅ create handler once
+	handler := products.NewHandler(productRepo)
+
 	router.Use(middleware.LoggingMiddleware)
+
 	router.GET("/products",
 		middleware.ExecutionTimeMiddleware,
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.NewHandler(repo.NewProductRepo()).GetProducts,
+		handler.GetProducts,
 	)
 
-	router.GET("/products/{id}", // handle /products/{id} inside handler
+	router.GET("/products/{id}",
 		middleware.ExecutionTimeMiddleware,
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.GetProductByID,
+		handler.GetProductByID, // ✅ use shared handler
 	)
+
 	router.POST("/products",
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.NewHandler(repo.NewProductRepo()).CreateProduct,
+		handler.CreateProduct, // ✅ shared
 	)
+
 	router.PATCH("/products/{id}",
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.NewHandler(repo.NewProductRepo()).UpdateProductById,
+		handler.UpdateProductById, // ✅ shared
 	)
+
 	router.DELETE("/products/{id}",
 		middleware.LoggingMiddleware,
 		middleware.AuthMiddleware,
-		products.DeleteProductById,
+		handler.DeleteProductById, // ✅ shared
 	)
 }

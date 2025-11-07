@@ -47,6 +47,7 @@ func (h *Handler) UpdateProductById(res http.ResponseWriter, req *http.Request) 
 	if err != nil {
 
 		utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", product)
+		return
 	}
 	utils.SendJSONResponse(res, http.StatusOK, "Product updated successfully", product)
 
