@@ -10,10 +10,18 @@ import (
 	"time"
 )
 
+type Payload struct {
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
 type JWTPayload struct {
-	Username string `json:"username"`
-	Iat      int64  `json:"iat"`
-	Exp      int64  `json:"exp"`
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+
+	Iat int64 `json:"iat"`
+	Exp int64 `json:"exp"`
 }
 
 type JWTHeader struct {
@@ -21,7 +29,7 @@ type JWTHeader struct {
 	Typ string `json:"type"`
 }
 
-func GenerateToken(username string) (string, error) {
+func GenerateToken(payload Payload) (string, error) {
 	header := JWTHeader{
 		Alg: "HS256",
 		Typ: "JWT",
@@ -29,14 +37,16 @@ func GenerateToken(username string) (string, error) {
 
 	now := time.Now()
 
-	payload := JWTPayload{
-		Username: username,
-		Iat:      now.Unix(),
-		Exp:      now.Add(1 * time.Hour).Unix(),
+	jwtPayload := JWTPayload{
+		Name:  payload.Name,
+		Email: payload.Email,
+		Id:    payload.Id,
+		Iat:   now.Unix(),
+		Exp:   now.Add(1 * time.Hour).Unix(),
 	}
 
 	headerJSON, _ := json.Marshal(header)
-	payloadJSON, _ := json.Marshal(payload)
+	payloadJSON, _ := json.Marshal(jwtPayload)
 
 	headerEncoded := base64.RawURLEncoding.EncodeToString(headerJSON)
 	payloadEncoded := base64.RawURLEncoding.EncodeToString(payloadJSON)

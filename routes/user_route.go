@@ -1,21 +1,18 @@
 package routes
 
 import (
-	"ecommerce/utils"
-	"net/http"
+	"ecommerce/repo"
+	"ecommerce/users"
 )
 
 func RegisterUserRoutes(router *Manager) {
-
-	router.GET("/users", func(res http.ResponseWriter, req *http.Request) {
-		utils.SendJSONResponse(res, http.StatusOK, "Users retrieved successfully", nil)
-	})
-	router.POST("/login", func(res http.ResponseWriter, req *http.Request) {
-		token, err := utils.GenerateToken("iqbal")
-		if err != nil {
-			utils.SendJSONResponse(res, http.StatusInternalServerError, "Failed to generate token", nil)
-			return
-		}
-		utils.SendJSONResponse(res, http.StatusOK, "Users retrieved successfully", token)
-	})
+	userRepo := repo.NewUserRepo()
+	handler := users.NewHandler(userRepo)
+	router.POST("/login", handler.Login)
+	router.POST("/users", handler.CreateUser)
+	router.GET("/users", handler.GetUsers)
+	router.GET("/users", handler.GetUsers)
+	router.GET("/users/{id}", handler.GetUser)
+	router.PATCH("/users/{id}", handler.UpdateUser)
+	router.DELETE("/users/{id}", handler.DeleteUser)
 }
