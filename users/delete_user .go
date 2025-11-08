@@ -17,11 +17,11 @@ func (h *Handler) DeleteUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	users, err := h.userRepo.Delete(id)
-	if err != nil {
-		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
+	isDeleted, err := h.userRepo.Delete(id)
+	if !isDeleted {
+		utils.SendJSONResponse(res, http.StatusNotFound,"User not found", nil)
 		return
 	}
-	utils.SendJSONResponse(res, http.StatusOK, "Users retrieved successfully", users)
+	utils.SendJSONResponse(res, http.StatusOK, "Users deleted successfully",nil)
 
 }

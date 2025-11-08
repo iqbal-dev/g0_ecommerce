@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+
+
 func Serve(cnf *config.Config) {
 	fmt.Println("🚀 Starting server...")
 	dbCon, err := db.NewConnection()
@@ -17,10 +19,10 @@ func Serve(cnf *config.Config) {
 		return
 	}
 
-	fmt.Println("🚀 Database connected", dbCon.Stats())
+	fmt.Println("🚀 Database connected")
 
 	router := routes.NewManager(http.NewServeMux())
-	routes.RegisterRoutes(router)
+	routes.RegisterRoutes(router,dbCon)
 	fmt.Println("🚀 Server running on port :", cnf.HttpPort)
 	err = http.ListenAndServe(cnf.HttpPort, middleware.Cors(router))
 	if err != nil {

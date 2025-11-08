@@ -4,12 +4,14 @@ import (
 	"ecommerce/products"
 	"ecommerce/repo"
 	"ecommerce/rest/middleware"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // RegisterProductRoutes registers all product-related routes
-func RegisterProductRoutes(router *Manager) {
+func RegisterProductRoutes(router *Manager, dbCon *sqlx.DB) {
 	// ✅ create repo once
-	productRepo := repo.NewProductRepo()
+	productRepo := repo.NewProductRepo(dbCon)
 
 	// ✅ create handler once
 	handler := products.NewHandler(productRepo)

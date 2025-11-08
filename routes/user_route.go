@@ -3,10 +3,12 @@ package routes
 import (
 	"ecommerce/repo"
 	"ecommerce/users"
+
+	"github.com/jmoiron/sqlx"
 )
 
-func RegisterUserRoutes(router *Manager) {
-	userRepo := repo.NewUserRepo()
+func RegisterUserRoutes(router *Manager, dbCon *sqlx.DB) {
+	userRepo := repo.NewUserRepo(dbCon)
 	handler := users.NewHandler(userRepo)
 	router.POST("/login", handler.Login)
 	router.POST("/users", handler.CreateUser)

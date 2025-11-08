@@ -1,94 +1,168 @@
 package repo
 
-import "errors"
+import (
+	"database/sql"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type Product struct {
-	Id          int     `json:"id"`          // Unique identifier for the product
-	Name        string  `json:"name"`        // Product name
-	Price       float64 `json:"price"`       // Product price
-	Description string  `json:"description"` // Product description
-	ImgUrl      string  `json:"img_url"`     // Product image URL
+	Id          int     `json:"id" db:"id"`          // Unique identifier for the product
+	Name        string  `json:"name" db:"name"`        // Product name
+	Price       float64 `json:"price" db:"price"`       // Product price
+	Description string  `json:"description" db:"description"` // Product description
+	ImgUrl      string  `json:"img_url" db:"img_url"`     // Product image URL
+	CreatedAt   string  `json:"created_ast" db:"created_at"`
+	UpdatedAt   string  `json:"updated_at" db:"updated_at"`
 }
 
 type ProductRepo interface {
 	Create(product Product) (*Product, error)
 	Update(id int, product Product) (*Product, error)
 	Delete(id int) (bool, error)
-	FindALl() ([]*Product, error)
+	FindAll() ([]*Product, error)
 	FindOne(id int) (*Product, error)
 }
 
 type productRepo struct {
-	productList []*Product
+	db *sqlx.DB
 	lastID      int
 }
 
-func NewProductRepo() ProductRepo {
-	repo := &productRepo{}
-	generateInitialProducts(repo)
+func NewProductRepo(db *sqlx.DB) ProductRepo {
+	repo := &productRepo{
+		db: db,
+	}
 	return repo
 }
 
 func (r *productRepo) Create(product Product) (*Product, error) {
-	r.lastID++
-	product.Id = r.lastID
-	r.productList = append(r.productList, &product)
-	return &product, nil
+	query := `
+	INSERT INTO products(
+		name,
+		price,
+		description,
+		img_url
+	) VALUES(
+		$1, $2, $3, $4
+
+	) RETURNING id, name, price, description, img_url, create_at, updated_at
+	`
+
+	var p Product
+	err := r.db.QueryRow(
+		query, 
+		product.Name, 
+		product.Price, 
+		product.Description, 
+		product.ImgUrl,
+		).Scan(
+		&p.Id,
+		&p.Price,
+		&p.Description,
+		&p.ImgUrl,
+	)
+	if err != nil{
+		return nil,err
+	}
+
+	return &p,nil
+
+
 }
 
 func (r *productRepo) Update(id int, product Product) (*Product, error) {
-	for i := range r.productList {
-		if r.productList[i].Id == id {
-			product.Id = id // ensure original ID
-			r.productList[i] = &product
-			return &product, nil
-		}
+	query := `
+		UPDATE products SET 
+			name = $1,
+			price = $2,
+			description = $3,
+			img_url = $4
+		WHERE id = $5
+		RETURNING id, name, price, description, img_url, create_at, updated_at
+	`
+	var p Product
+	err := r.db.QueryRow(
+		query,product.Name, 
+		product.Price, 
+		product.Description, 
+		product.ImgUrl,
+		id,
+		).Scan(
+		&p.Id,
+		&p.Price,
+		&p.Description,
+		&p.ImgUrl,
+		&p.CreatedAt,
+		&p.UpdatedAt,
+	)
+
+	if err !=nil{
+		return nil,err
 	}
-	return nil, errors.New("product not found")
+	return &p,nil
+
+
+
 }
 
 func (r *productRepo) Delete(id int) (bool, error) {
-	var newList []*Product
-	deleted := false
+    query := `
+    DELETE FROM products
+    WHERE id = $1
+    RETURNING id;
+    `
 
-	for _, p := range r.productList {
-		if p.Id == id {
-			deleted = true
-			continue
-		}
-		newList = append(newList, p)
-	}
+    var deletedId int
 
-	r.productList = newList
-	return deleted, nil
+    err := r.db.QueryRow(query, id).Scan(&deletedId)
+    if err != nil {
+        // If no rows matched, it's NOT an error — it's just not found
+        if err == sql.ErrNoRows {
+            return false, nil
+        }
+        return false, err
+    }
+
+    return true, nil
 }
 
-func (r *productRepo) FindALl() ([]*Product, error) {
-	return r.productList, nil
+func (r *productRepo) FindAll() ([]*Product, error) {
+    query := `
+    SELECT 
+        id, name, price, description, img_url, created_at, updated_at
+    FROM products
+    ORDER BY id DESC;
+    `
+
+    var products []*Product
+
+    err := r.db.Select(&products, query)
+    if err != nil {
+        return nil, err
+    }
+
+    return products, nil
 }
 
 func (r *productRepo) FindOne(id int) (*Product, error) {
-	for _, p := range r.productList {
-		if p.Id == id {
-			return p, nil
-		}
-	}
-	return nil, errors.New("product not found")
+    query := `
+    SELECT 
+        id, name, price, description, img_url, created_at, updated_at
+    FROM products
+    WHERE id = $1;
+    `
+
+    var product Product
+
+    err := r.db.Get(&product, query, id)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return nil, nil // not found
+        }
+        return nil, err
+    }
+
+    return &product, nil
 }
 
-func generateInitialProducts(r *productRepo) {
-	products := []Product{
-		{1, "Product 1", 10.99, "This is product 1", "http://example.com/product1.jpg"},
-		{2, "Product 2", 15.49, "This is product 2", "http://example.com/product2.jpg"},
-		{3, "Product 3", 7.99, "This is product 3", "http://example.com/product3.jpg"},
-		{4, "Product 4", 12.75, "This is product 4", "http://example.com/product4.jpg"},
-		{5, "Product 5", 9.50, "This is product 5", "http://example.com/product5.jpg"},
-		{6, "Product 6", 20.00, "This is product 6", "http://example.com/product6.jpg"},
-	}
-
-	for i := range products {
-		r.productList = append(r.productList, &products[i])
-	}
-
-	r.lastID = len(products)
-}
