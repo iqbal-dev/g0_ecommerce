@@ -1,6 +1,10 @@
 package repo
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type User struct {
 	Id       int    `json:"id"`
@@ -19,48 +23,68 @@ type UserRepo interface {
 }
 
 type userRepo struct {
-	userList []*User
+	db *sqlx.DB
 	lastID   int
 }
 
-func NewUserRepo() UserRepo {
-	repo := &userRepo{}
+func NewUserRepo(db *sqlx.DB) UserRepo {
+	repo := &userRepo{
+		db: db,
+	}
 	return repo
 }
 
 func (r *userRepo) Create(user User) (*User, error) {
-	r.lastID++
-	user.Id = r.lastID
-	r.userList = append(r.userList, &user)
-	return &user, nil
+	query := `
+		INSERT INTO users (name, email, password)
+		VALUES (:name, :email, :password)
+		RETURNING id, name, email, password, created_at, updated_at;
+	`
+
+	rows, err := r.db.NamedQuery(query, user)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var newUser User
+	if rows.Next() {
+		if err := rows.StructScan(&newUser); err != nil {
+			return nil, err
+		}
+	}
+
+	return &newUser, nil
 }
 
 func (r *userRepo) Update(id int, user User) (*User, error) {
-	for i := range r.userList {
-		if r.userList[i].Id == id {
-			user.Id = id // ensure original ID
-			r.userList[i] = &user
-			return &user, nil
+		user.Id = id
+		query := `
+		UPDATE users
+			SET name = :name,
+				email = :email,
+				password = :password
+		WHERE id = :id
+		RETURNING id, name, email, password, created_at, updated_at;
+		`
+		rows, err := r.db.NamedQuery(query, user)
+		if err != nil {
+			return nil, err
 		}
-	}
-	return nil, errors.New("user not found")
+		defer rows.Close()
+		var updatedUser User
+		if rows.Next() {
+			if err := rows.StructScan(&updatedUser); err != nil {
+				return nil, err
+			}
+		}
+		return &updatedUser, nil
+	
 
 }
 
 func (r *userRepo) Delete(id int) (bool, error) {
-	var newList []*User
-	deleted := false
-
-	for _, u := range r.userList {
-		if u.Id == id {
-			deleted = true
-			continue
-		}
-		newList = append(newList, u)
-	}
-
-	r.userList = newList
-	return deleted, nil
+	
 }
 
 func (r *userRepo) FindALl() ([]*User, error) {
