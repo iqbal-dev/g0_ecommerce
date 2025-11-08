@@ -46,7 +46,7 @@ func (r *productRepo) Create(product Product) (*Product, error) {
 	) VALUES(
 		$1, $2, $3, $4
 
-	) RETURNING id, name, price, description, img_url, create_at, updated_at
+	) RETURNING id, name, price, description, img_url, created_at, updated_at
 	`
 
 	var p Product
@@ -58,9 +58,12 @@ func (r *productRepo) Create(product Product) (*Product, error) {
 		product.ImgUrl,
 		).Scan(
 		&p.Id,
+		&p.Name,
 		&p.Price,
 		&p.Description,
 		&p.ImgUrl,
+		&p.CreatedAt,
+		&p.UpdatedAt,
 	)
 	if err != nil{
 		return nil,err
@@ -77,9 +80,10 @@ func (r *productRepo) Update(id int, product Product) (*Product, error) {
 			name = $1,
 			price = $2,
 			description = $3,
-			img_url = $4
+			img_url = $4,
+			updated_at = NOW()
 		WHERE id = $5
-		RETURNING id, name, price, description, img_url, create_at, updated_at
+		RETURNING id, name, price, description, img_url, created_at, updated_at
 	`
 	var p Product
 	err := r.db.QueryRow(
@@ -90,6 +94,7 @@ func (r *productRepo) Update(id int, product Product) (*Product, error) {
 		id,
 		).Scan(
 		&p.Id,
+		&p.Name,
 		&p.Price,
 		&p.Description,
 		&p.ImgUrl,

@@ -36,7 +36,7 @@ func (h *Handler) CreateProduct(res http.ResponseWriter, req *http.Request) {
 	})
 
 	if err != nil {
-		utils.SendJSONResponse(res, http.StatusInternalServerError, "Failed to create product", nil)
+		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return
 
 	}

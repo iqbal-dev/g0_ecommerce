@@ -3,9 +3,11 @@ package utils
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"ecommerce/config"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +32,10 @@ type JWTHeader struct {
 }
 
 func GenerateToken(payload Payload) (string, error) {
+	_, err := strconv.Atoi(config.GetConfig().AccessTokenExpireTime)
+	if err != nil {
+		return "", errors.New("Invalid Expired time")
+	}
 	header := JWTHeader{
 		Alg: "HS256",
 		Typ: "JWT",

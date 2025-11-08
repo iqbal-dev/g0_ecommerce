@@ -13,7 +13,7 @@ import (
 
 func Serve(cnf *config.Config) {
 	fmt.Println("🚀 Starting server...")
-	dbCon, err := db.NewConnection()
+	dbCon, err := db.NewConnection(&cnf.DBConfig)
 	if err != nil {
 		fmt.Println("❌ Error connecting to database:", err)
 		return
