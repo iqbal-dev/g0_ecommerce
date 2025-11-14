@@ -6,8 +6,7 @@ import (
 	"strconv"
 )
 
-func (h *Handler) GetProductByID(res http.ResponseWriter, req *http.Request) {
-
+func (h *Handler) DeleteProductById(res http.ResponseWriter, req *http.Request) {
 	productId := req.PathValue("id")
 
 	id, err := strconv.Atoi(productId)
@@ -16,11 +15,16 @@ func (h *Handler) GetProductByID(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	product, err := h.productRepo.FindOne(id)
+	deleted, err := h.svc.Delete(id)
 	if err != nil {
 		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	utils.SendJSONResponse(res, http.StatusOK, "Product fetch successfully", product)
-	// Implementation for getting a product by ID will go here
+
+	if !deleted {
+		utils.SendJSONResponse(res, http.StatusNotFound, "Product not found", nil)
+		return
+	}
+
+	utils.SendJSONResponse(res, http.StatusOK, "Product deleted", nil)
 }

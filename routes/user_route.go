@@ -2,7 +2,7 @@ package routes
 
 import (
 	"ecommerce/repo"
-	"ecommerce/users"
+	"ecommerce/rest/handlers/users"
 
 	"github.com/jmoiron/sqlx"
 )

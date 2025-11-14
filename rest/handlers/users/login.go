@@ -21,7 +21,7 @@ func (h *Handler) Login(res http.ResponseWriter, req *http.Request) {
 		utils.SendJSONResponse(res, http.StatusBadRequest, "Invalid request payload", nil)
 	}
 
-	users, err := h.userRepo.FindByEmailAndPassword(newUser.Email, newUser.Password)
+	users, err := h.svc.FindByEmailAndPassword(newUser.Email, newUser.Password)
 	if err != nil {
 		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return

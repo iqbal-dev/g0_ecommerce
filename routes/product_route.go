@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"ecommerce/products"
+	"ecommerce/product"
 	"ecommerce/repo"
+	"ecommerce/rest/handlers/products"
 	"ecommerce/rest/middleware"
 
 	"github.com/jmoiron/sqlx"
@@ -12,9 +13,10 @@ import (
 func RegisterProductRoutes(router *Manager, dbCon *sqlx.DB) {
 	// ✅ create repo once
 	productRepo := repo.NewProductRepo(dbCon)
+	productSvc := product.NewService(productRepo)
 
 	// ✅ create handler once
-	handler := products.NewHandler(productRepo)
+	handler := products.NewHandler(productSvc)
 
 	router.Use(middleware.LoggingMiddleware)
 

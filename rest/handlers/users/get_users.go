@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) GetUsers(res http.ResponseWriter, req *http.Request) {
-	users, err := h.userRepo.FindAll()
+	users, err := h.svc.FindAll()
 	if err != nil {
 		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return

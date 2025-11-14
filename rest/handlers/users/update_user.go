@@ -1,7 +1,7 @@
 package users
 
 import (
-	"ecommerce/repo"
+	"ecommerce/domain"
 	"ecommerce/utils"
 	"encoding/json"
 	"net/http"
@@ -17,7 +17,7 @@ func (h *Handler) UpdateUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var updateProduct UserType
+	var updateProduct domain.User
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&updateProduct)
 	if err != nil {
@@ -25,7 +25,7 @@ func (h *Handler) UpdateUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	product, err := h.userRepo.Update(id, repo.User{
+	product, err := h.svc.Update(id, domain.User{
 		Name:     updateProduct.Name,
 		Email:    updateProduct.Email,
 		Password: updateProduct.Password,

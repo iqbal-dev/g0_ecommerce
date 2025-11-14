@@ -23,7 +23,7 @@ func Serve(cnf *config.Config) {
 
 	router := routes.NewManager(http.NewServeMux())
 	routes.RegisterRoutes(router,dbCon)
-	fmt.Println("🚀 Server running on port :", cnf.HttpPort)
+	fmt.Println("🚀 Server running on port ", cnf.HttpPort)
 	err = http.ListenAndServe(cnf.HttpPort, middleware.Cors(router))
 	if err != nil {
 		fmt.Println("❌ Error starting server:", err)

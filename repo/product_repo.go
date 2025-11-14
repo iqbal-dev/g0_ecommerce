@@ -3,25 +3,15 @@ package repo
 import (
 	"database/sql"
 
+	"ecommerce/domain"
+	"ecommerce/product"
+
 	"github.com/jmoiron/sqlx"
 )
 
-type Product struct {
-	Id          int     `json:"id" db:"id"`          // Unique identifier for the product
-	Name        string  `json:"name" db:"name"`        // Product name
-	Price       float64 `json:"price" db:"price"`       // Product price
-	Description string  `json:"description" db:"description"` // Product description
-	ImgUrl      string  `json:"img_url" db:"img_url"`     // Product image URL
-	CreatedAt   string  `json:"created_ast" db:"created_at"`
-	UpdatedAt   string  `json:"updated_at" db:"updated_at"`
-}
 
 type ProductRepo interface {
-	Create(product Product) (*Product, error)
-	Update(id int, product Product) (*Product, error)
-	Delete(id int) (bool, error)
-	FindAll() ([]*Product, error)
-	FindOne(id int) (*Product, error)
+	product.ProductRepo
 }
 
 type productRepo struct {
@@ -36,7 +26,7 @@ func NewProductRepo(db *sqlx.DB) ProductRepo {
 	return repo
 }
 
-func (r *productRepo) Create(product Product) (*Product, error) {
+func (r *productRepo) Create(product domain.Product) (*domain.Product, error) {
 	query := `
 	INSERT INTO products(
 		name,
@@ -49,7 +39,7 @@ func (r *productRepo) Create(product Product) (*Product, error) {
 	) RETURNING id, name, price, description, img_url, created_at, updated_at
 	`
 
-	var p Product
+	var p domain.Product
 	err := r.db.QueryRow(
 		query, 
 		product.Name, 
@@ -74,7 +64,7 @@ func (r *productRepo) Create(product Product) (*Product, error) {
 
 }
 
-func (r *productRepo) Update(id int, product Product) (*Product, error) {
+func (r *productRepo) Update(id int, product domain.Product) (*domain.Product, error) {
 	query := `
 		UPDATE products SET 
 			name = $1,
@@ -85,7 +75,7 @@ func (r *productRepo) Update(id int, product Product) (*Product, error) {
 		WHERE id = $5
 		RETURNING id, name, price, description, img_url, created_at, updated_at
 	`
-	var p Product
+	var p domain.Product
 	err := r.db.QueryRow(
 		query,product.Name, 
 		product.Price, 
@@ -132,7 +122,7 @@ func (r *productRepo) Delete(id int) (bool, error) {
     return true, nil
 }
 
-func (r *productRepo) FindAll() ([]*Product, error) {
+func (r *productRepo) FindAll() ([]*domain.Product, error) {
     query := `
     SELECT 
         id, name, price, description, img_url, created_at, updated_at
@@ -140,7 +130,7 @@ func (r *productRepo) FindAll() ([]*Product, error) {
     ORDER BY id DESC;
     `
 
-    var products []*Product
+    var products []*domain.Product
 
     err := r.db.Select(&products, query)
     if err != nil {
@@ -150,7 +140,7 @@ func (r *productRepo) FindAll() ([]*Product, error) {
     return products, nil
 }
 
-func (r *productRepo) FindOne(id int) (*Product, error) {
+func (r *productRepo) FindOne(id int) (*domain.Product, error) {
     query := `
     SELECT 
         id, name, price, description, img_url, created_at, updated_at
@@ -158,7 +148,7 @@ func (r *productRepo) FindOne(id int) (*Product, error) {
     WHERE id = $1;
     `
 
-    var product Product
+    var product domain.Product
 
     err := r.db.Get(&product, query, id)
     if err != nil {

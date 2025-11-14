@@ -1,29 +1,23 @@
 package repo
 
 import (
+	"ecommerce/domain"
 	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type User struct {
-	Id        int    `db:"id" json:"id"`
-	Name      string `db:"name" json:"name"`
-	Email     string `db:"email" json:"email"`
-	Password  string `db:"password" json:"password"`
-	CreatedAt string `db:"created_at" json:"created_at"`
-	UpdatedAt string `db:"updated_at" json:"updated_at"`
-}
+
 
 
 type UserRepo interface {
-	Create(user User) (*User, error)
-	Update(id int, user User) (*User, error)
+	Create(user domain.User) (*domain.User, error)
+	Update(id int, user domain.User) (*domain.User, error)
 	Delete(id int) (bool, error)
-	FindAll() ([]*User, error)
-	FindOne(id int) (*User, error)
-	FindByEmailAndPassword(email string, password string) (*User, error)
+	FindAll() ([]*domain.User, error)
+	FindOne(id int) (*domain.User, error)
+	FindByEmailAndPassword(email string, password string) (*domain.User, error)
 }
 
 type userRepo struct {
@@ -38,7 +32,7 @@ func NewUserRepo(db *sqlx.DB) UserRepo {
 	return repo
 }
 
-func (r *userRepo) Create(user User) (*User, error) {
+func (r *userRepo) Create(user domain.User) (*domain.User, error) {
 	query := `
 		INSERT INTO users (name, email, password)
 		VALUES (:name, :email, :password)
@@ -51,7 +45,7 @@ func (r *userRepo) Create(user User) (*User, error) {
 	}
 	defer rows.Close()
 
-	var newUser User
+	var newUser domain.User
 	if rows.Next() {
 		if err := rows.StructScan(&newUser); err != nil {
 			return nil, err
@@ -61,7 +55,7 @@ func (r *userRepo) Create(user User) (*User, error) {
 	return &newUser, nil
 }
 
-func (r *userRepo) Update(id int, user User) (*User, error) {
+func (r *userRepo) Update(id int, user domain.User) (*domain.User, error) {
 	user.Id = id
 
 	query := `
@@ -79,7 +73,7 @@ func (r *userRepo) Update(id int, user User) (*User, error) {
 	}
 	defer rows.Close()
 
-	var updatedUser User
+	var updatedUser domain.User
 	if rows.Next() {
 		// Scan the returned row into updatedUser
 		if err := rows.StructScan(&updatedUser); err != nil {
@@ -110,8 +104,8 @@ func (r *userRepo) Delete(id int) (bool, error) {
 	return rows > 0, nil
 }
 
-func (r *userRepo) FindAll() ([]*User, error) {
-	var users []*User
+func (r *userRepo) FindAll() ([]*domain.User, error) {
+	var users []*domain.User
 
 	query := `
 		SELECT id, name, email, password, created_at, updated_at
@@ -128,8 +122,8 @@ func (r *userRepo) FindAll() ([]*User, error) {
 }
 
 
-func (r *userRepo) FindOne(id int) (*User, error) {
-	var user User
+func (r *userRepo) FindOne(id int) (*domain.User, error) {
+	var user domain.User
 
 	query := `
 		SELECT id, name, email, password, created_at, updated_at
@@ -145,8 +139,8 @@ func (r *userRepo) FindOne(id int) (*User, error) {
 	return &user, nil
 }
 
-func (r *userRepo) FindByEmailAndPassword(email string, password string) (*User, error) {
-	var user User
+func (r *userRepo) FindByEmailAndPassword(email string, password string) (*domain.User, error) {
+	var user domain.User
 
 	query := `
 		SELECT id, name, email, password, created_at, updated_at

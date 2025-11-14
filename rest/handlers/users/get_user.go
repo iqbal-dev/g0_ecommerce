@@ -17,7 +17,7 @@ func (h *Handler) GetUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	users, err := h.userRepo.FindOne(id)
+	users, err := h.svc.FindOne(id)
 	if err != nil {
 		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return

@@ -8,7 +8,7 @@ import (
 // getProducts handles GET requests to the "/products" endpoint.
 // It returns a JSON response containing all products.
 func (h *Handler) GetProducts(res http.ResponseWriter, req *http.Request) {
-	products, err := h.productRepo.FindAll()
+	products, err := h.svc.FindAll()
 	if err != nil {
 		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
 		return
