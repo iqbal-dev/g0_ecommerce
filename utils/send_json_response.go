@@ -7,8 +7,8 @@ import (
 
 // sendJSONResponse is a helper function to send standardized JSON responses.
 // It accepts a status code, message, and optional data payload.
-func SendJSONResponse(w http.ResponseWriter, statusCode int, message string, data interface{}) {
-	response := map[string]interface{}{
+func SendJSONResponse(w http.ResponseWriter, statusCode int, message string, data any) {
+	response := map[string]any{
 		"message": message,
 	}
 

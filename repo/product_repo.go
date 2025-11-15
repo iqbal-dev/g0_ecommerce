@@ -122,22 +122,37 @@ func (r *productRepo) Delete(id int) (bool, error) {
     return true, nil
 }
 
-func (r *productRepo) FindAll() ([]*domain.Product, error) {
+func (r *productRepo) FindAll(page, limit int64) ([]*domain.Product, int64, error) {
+    // Calculate offset
+    offset := (page - 1) * limit
+
+    // Query to fetch paginated products
     query := `
-    SELECT 
-        id, name, price, description, img_url, created_at, updated_at
-    FROM products
-    ORDER BY id DESC;
+        SELECT 
+            id, name, price, description, img_url, created_at, updated_at
+        FROM products
+        ORDER BY id DESC
+        LIMIT $1 OFFSET $2;
     `
 
     var products []*domain.Product
 
-    err := r.db.Select(&products, query)
+    // Fetch products
+    err := r.db.Select(&products, query, limit, offset)
     if err != nil {
-        return nil, err
+        return nil, 0, err
     }
 
-    return products, nil
+    // Query to count total products
+    countQuery := `SELECT COUNT(*) FROM products;`
+
+    var total int64
+    err = r.db.Get(&total, countQuery)
+    if err != nil {
+        return nil, 0, err
+    }
+
+    return products, total, nil
 }
 
 func (r *productRepo) FindOne(id int) (*domain.Product, error) {
