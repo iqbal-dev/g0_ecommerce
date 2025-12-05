@@ -1,0 +1,24 @@
+package products
+
+import (
+	"ecommerce/utils"
+	"net/http"
+	"strconv"
+)
+
+func (h *Handler) GetProductByID(res http.ResponseWriter, req *http.Request) {
+	productId := req.PathValue("id")
+
+	id, err := strconv.Atoi(productId)
+	if err != nil {
+		utils.SendJSONResponse(res, http.StatusBadRequest, "Invalid product ID", nil)
+		return
+	}
+
+	product, err := h.svc.FindOne(id)
+	if err != nil {
+		utils.SendJSONResponse(res, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	utils.SendJSONResponse(res, http.StatusOK, "Product fetched successfully", product)
+}

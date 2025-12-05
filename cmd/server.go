@@ -2,18 +2,16 @@ package cmd
 
 import (
 	"ecommerce/config"
-	"ecommerce/infra/db"
-	"ecommerce/rest/middleware"
-	"ecommerce/routes"
+	infradb "ecommerce/internal/infrastructure/db/postgres"
+	"ecommerce/internal/interface/http/middleware"
+	"ecommerce/internal/interface/http/router"
 	"fmt"
 	"net/http"
 )
 
-
-
 func Serve(cnf *config.Config) {
 	fmt.Println("🚀 Starting server...")
-	dbCon, err := db.NewConnection(&cnf.DBConfig)
+	dbCon, err := infradb.NewConnection(&cnf.DBConfig)
 	if err != nil {
 		fmt.Println("❌ Error connecting to database:", err)
 		return
@@ -21,11 +19,11 @@ func Serve(cnf *config.Config) {
 
 	fmt.Println("🚀 Database connected")
 
-	router := routes.NewManager(http.NewServeMux())
-	routes.RegisterRoutes(router,dbCon)
+	r := router.NewManager(http.NewServeMux())
+	router.RegisterRoutes(r, dbCon)
+
 	fmt.Println("🚀 Server running on port ", cnf.HttpPort)
-	err = http.ListenAndServe(cnf.HttpPort, middleware.Cors(router))
-	if err != nil {
+	if err := http.ListenAndServe(cnf.HttpPort, middleware.Cors(r)); err != nil {
 		fmt.Println("❌ Error starting server:", err)
 	}
 }
